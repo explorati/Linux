@@ -1,0 +1,5 @@
+1.使用puttygen生成一对公钥和私钥，保存私钥和公钥
+2.登录谷歌云，云服务器中有元数据选项，下面有SSH，点击修改，新增密钥，
+	复制上面的格式，将原来的公钥替换为puttygen生成的公钥(注意格式要与原来给定的格式相同)
+3.在putty中 Session中HostName输入 SSH中的用户名@外网地址   如 google@193.441.31.3
+4.再在putty中点击Connection->SSH->Auth  Browse中找到puttygen中生成的私钥，登录即可
