@@ -1,0 +1,65 @@
+远程服务器管理工具SSH(Securty Shell)
+	SSH工具
+		SSH是什么(用途：在windows直接连接linux，或在mac中直接连接Linux)
+			SSH：Secure Shell 安全外壳协议
+			建立在应用层基础上的安全协议
+			可靠，专为远程登录会话和其他网络服务提供安全性的协议
+			有效防止远程管理过程中的信息泄露问题
+			SSH客户端适用于多种平台
+			SSH服务器几乎支持所有UNIX平台
+		服务器安装SSH客户端
+			安装SSH
+				yum install openssh-server
+			启动SSH
+				service sshd start
+
+				查看进程在不在：ps -ef|grep ssh
+			设置开机运行
+				chkconfig sshd on
+		客户端安装SSH客户端
+			SSH是典型的客户端和服务端的交互模式，客户端广泛的支持各个平台
+			Windows有很多工具可以支持SSH连接功能，例如：Xshell，Putty，secureCRT
+			Linux平台需要安装客户端软件
+				yum install openssh-clients
+
+------------------------------------------------------------------------------
+购买云服务器上面的配置都不需要
+
+		SSH客户端连接服务器
+			ssh root@ip地址(192.168.43.107)  公网ip
+		SSH config用法详解
+			config为了方便我们批量管理多个SSH
+			config存放在 ~/.ssh/config(.表示是隐藏路径)
+			config 配置语法
+				SSH config 语法关键字
+				  cd ~/.ssh/    touch config   vim config   ssh imooc
+					Host 别名    HostName 主机名   Port 端口(ssh默认端口22)  User 用户名  IdentifyFile 密钥文件的路径
+					host "imooc"
+					    HostName 192.168.43.141
+					    User root
+					    Port 22
+				配置完成之后，就可以通过ssh imooc来登录(原来是ssh root@公网ip)
+
+--------------------------------------------------------------
+直接通过ssh的方式登录，不在需要密码，主要机制为：在远程连接工具(如Xshell)上生成一个用户密钥，保存在windows中，然后将密钥内容放到linux中的authorized_keys中，然后就可以了。
+MAC中和在linux中生成公钥方式一样，ssh-keygen -t rsa(加密方法) 然后将其加到authorized中
+		免密码登录 方案之 SSH Key
+			ssh key 使用非对称加密方式生成公钥 和 私钥
+			私钥存放在本地~/.ssh目录
+			公钥可以对外公开，放在服务器的~/.ssh/ authorized_keys
+
+			Linux平台生成ssh key
+				ssh-keygen -t rsa或者ssh-keygen -t dsa
+				将本地linux中生成的公钥放到另一个linux服务器上的authorized_keys中
+				在本地linux中将密钥添加进去 ssh-add ~/.ssh/imooc_rsa
+
+
+				
+		SSH端口安全
+			端口安全指的是尽量避免服务器的远程连接端口被不法分子知道，为此而改变默认服务器端口号的操作
+			如何改变SSH服务端口
+				修改/etc/ssh/sshd_config配置
+					可以配置多个端口，配置完之后 service sshd restart
+				http默认80，https默认443
+
+		个性化脚本一键登录服务器
