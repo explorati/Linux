@@ -1,0 +1,152 @@
+Linux常用命令
+	软件操作命令
+		软件包管理器：yum
+		安装软件：yum install xxx	yum install vim
+		卸载软件：yum remove xxx
+		搜索软件：yum search xxx		yum search java  yum search c
+		清理缓存：yum clean packages
+		列出已安装：yum list
+		软件包信息：yum info xxx		yum info vim    yum info vim-commmon
+-------------------------------------------------------------------------------		
+	服务器硬件资源和磁盘操作
+		内存：free -m(以兆为单位展示)
+		硬盘：df -h(human：以人类可以看懂的方式展示)
+		负载：w/top			 0.03, 0.04, 0.05：表示最近1分钟、五分钟、十五分钟的平均负载，一般0.6或0.7位阈值，超过就危险
+		cpu个数和核数：cat /proc/cpuinfo
+		格式化磁盘：fdisk
+-----------------------------------------------------------------------------------
+	文件和文件夹操作命令
+		文件目录结构
+			根目录   /
+			家目录   /home  (~：当前用户的家目录)
+			临时目录 /tmp
+			配置目录 /etc
+			用户程序目录 /usr
+		文件基本操作
+			ls :查看目录下的文件
+			touch :新建文件
+			mkdir :新建文件夹  mkdir -p imooc/test1/test2
+			cd :进入目录
+			rm :删除文件和目录  rm -r imooc    rm -rf imooc
+			cp :复制	           cp ./imooc.log ~/imooc.log2
+			mv :移动				mv ./imooc.log ~/
+			pwd:显示路径
+		文本编辑神器Vim
+		 	yum install vim
+		 		i
+		 		a
+		 		o
+		 		dd:删除一行
+		 		u:恢复
+		 		gg:行首
+		 		G:行尾
+		 		yy:复制一行
+		 		p：粘贴
+		 		esc：退出编辑
+		 		:q : 退出不保存
+		 		:wq：保存退出
+		 		shift+zz:保存退出
+
+		 	新建并编辑文件
+		 		vim imooc
+		文件权限 421
+			rwx -> 1*2^2 + 1*2^1 + 1*2^0 =1  有这位的权限,这一位就为1
+			-rw-r--r--: 文件644    drwxr-xr-x:755
+----------------------------------------------------------------------------------------------
+		文件搜索、查找、读取
+			tail 从文件尾部开始读					tail -f imooc			cat imooc|wc -l
+			head 从文件头部读						head imooc				grep "11" imooc|wc -l
+			cat  读取整个文件						cat imooc				find . -name "*.c"
+			more 分页读取						ls -al					find /etc -name "*.conf"
+			less 可控分页						more imooc				find . -type -f 
+			grep 搜索关键字						less imooc				find -ctime 20
+			find 查找文件						grep "11" imooc			find -type -f -ctime -30
+			wc   统计个数						grep -n "11" imooc		find / -type f -size 0 ls -l
+												find . -type f -perm 644 -exec ls -l {} \;
+												find -type f name 'imooc' -exec rm {}\;
+		文件解压
+			tar -zxvf cf 
+			tar -zcvf tvf 
+			man tar 
+			tar -cf imooc.tar imooc
+			tar -tf imooc.tar : t:查看
+			tar -tvf imooc.tar :tv:显示详细信息
+			tar -xf imooc.tar
+			tar -zcvf imooc.tar.gz imooc
+			tar -tzvf imooc.tar.gz
+			tar -cvf|tvf|xvf
+			tar -zcvf|zxvf|ztvf
+			tar -jzvf|jxvf|jtvf
+			tar -xf imooc.tar
+	系统用户操作命令
+		useradd  添加用户
+		adduser	 添加用户  两个添加的区别
+			cd /home 
+			useradd imooc
+			useradd imooc_test
+		userdel	 删除用户
+			userdel imooc_test
+			rm -rf imooc_test
+			useradd imooc_test
+			userdel -r imooc_test
+		passwd   设置密码
+			passwd imooc
+	防火墙相关设置
+		作用：保护服务器安全
+		设置防火墙规则
+			开放80(web server),22(ssh)端口
+		关闭防火墙
+
+		list yum|grep firewall
+		ps -ef|grep firewall
+		安装 yum install firewalld
+		启动 service firewalld start
+		重启 service firewalld restart
+		检查状态 service firewalld status
+		关闭或禁用防火墙  service firewalld stop/disable
+				sudo service firewalld stop
+		firewall-cmd --version
+		firewall-cmd --state
+		firewall-cmd --get-zones  区域和端口
+		firewall-cmd --get-default-zone	查看默认区域
+		firewall-cmd --list-all-zones
+		firewall-cmd --list-ports	默认public端口是没有的
+
+		firewall-cmd --query-service=ssh 此时查询的是默认区域，即public
+		firewall-cmd --remove-service=ssh 使用之后ssh连接是连不上的
+		firewall-cmd --add-service=ssh
+		firewall-cmd --list-services
+-----------------------------------------------------------------------------------
+		firewall-cmd --remove-service=ssh	remove之后ssh就访问不到了，连接失败
+		firewall-cmd --query-port=22/tcp	
+		firewall-cmd --add-port=22/tcp		需添加端口port=22才能连接
+		firewall-cmd --query-port=22/tcp
+		firewall-cmd --list-ports
+		firewall-cmd --list-all-zones
+		firewall-cmd --add-service=ssh
+										服务和端口添加一个就ok了，服务更便捷
+-----------------------------------------------------------------------------------
+	提权操作sudo 和 文件传输操作
+		提权：sudo
+			visudo：修改root用户中的信息，将imooc的权限提权，和root用户一样的权限
+			在root的/home下 visudo
+				## Allows people in group wheel to run all commands
+				%wheel  ALL=(ALL)       ALL
+				%imooc  ALL=(ALL)       ALL
+				## Same thing without a password
+				# %wheel        ALL=(ALL)       NOPASSWD: ALL
+
+		文件下载
+			wget、curl
+				wget http://www.baidu.com
+				curl -o baidu.html http://www.baidu.com
+					-o命名
+		文件上传
+			scp(linux系统)			基于ssh服务的
+				scp imooc.txt imooc@192.168.43.141:/tmp/
+				scp imooc@192.168.43.141:/imooc.txt ./
+
+			(Windows)
+			yum install lrzsz
+			rz:windows上传
+			sz:linux上传
