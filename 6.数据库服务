@@ -1,0 +1,101 @@
+Mysql基本操作
+	安装服务器 yum install mysql-community-server
+	启动 service mysqld start/restart
+	停止 service mysqld stop
+	service mysqld status
+
+CentOS7默认安装mariadb数据库,将其删除
+	yum search mysql
+	yum remove mariadb-libs.x86_64
+下载Mysql源
+	https://dev.mysql.com/downloads/repo/yum
+安装源
+	yum localinstall mysql57-community-release-el7-9.noarch.rpm
+		yum search mysql
+安装mysql
+	yum install mysql-community-server
+
+	ps -ef|grep msyql
+	sudo service mysqld start
+--------------------------------------------------------------
+查看默认密码
+	cat /var/log/mysqld.log | grep "password"
+登录mysql
+	mysql -uroot -p上面的密码
+	当密码中出现特殊字符时需要进行转义，用\
+更改密码
+	默认格式须为'大写字母+数字+特殊字符',但是如果不想设置的那么麻烦
+	set global validate_password_policy=0;
+	set global validate_password_length=1;
+	set password=password('123456');
+	或者alter user 'root'@'localhost' identified by '123456';
+-------------------------------------------------------------------
+登录时的安全性
+	mysql -uroot -p密码  不安全，黑客可以通过history来查看你的命令
+	mysql -uroot -p  然后输密码  安全
+正常登录
+	mysql -h127.0.0.1 -uroot -p
+查看mysql进程
+	ps -ef | grep mysql
+远程连接
+	需设置访问权限  
+	show databases;
+	use mysql;
+	show tables;
+	select * from user \G;   \G:格式化显示
+	select Host,User from user \G;
+	update user set Host="%" where Host="localhost" and User="root";	将权限改为所有主机都可访问
+	flush privileges; 或者exit之后 sudo service mysqld restart;
+将防火墙关闭
+	sudo service firewalld stop
+
+grant SELECT,UPDATE,INSERT,DELETE on *.* to ‘work’@’%’ identified by ‘Xiangze230!’
+这样赋予权限之后在本地无法通过导入数据库备份文件的方式导入sql，根据上文就可以解决
+------------------------------------------------------------------------------------------
+开启genelog(通用日志)
+	genelog会记录所有我们的sql操作语句(在排错时会有明显作用)
+	进入mysql中：
+	设置文件位置：1.set global general_log_file="/tmp/general.log";
+	开启：2.set global general_log=on;
+	开启之后在/tmp/general.log中就可以看到操作数据库的语句
+		进入到/tmp/general.log中后用tail -f general.log
+关闭genelog
+	set global general_log=off;
+-------------------------------------------------------------------------------------
+在mysql中新建一个用户：
+	mysql -uroot -p
+	create user 'imooc'@'%' identified by 'Wl52000.';   --%：表示允许所有主机进行连接
+	提示password不符合规则：set global validate_password_policy=0;set global validate_password_length=1;
+	赋予权限：grant all privileges on *.* to 'imooc'@'%' identified by 'Wl52000.' with grant option;
+		*.*表示任意库任意表
+	刷新权限：flush privileges;
+	不赋予那么多权限：grant select ,insert,update ,delete on *.* to 'imooc'@'%' identified by 'Wl52000.';
+	收回权限 revoke all privileges on *.* FROM imooc;  flush privileges;
+			flush privileges;
+
+删除用户：show databases; use mysql; delete from user where User="imooc" and Host="%";
+------------------------------------------------------------------------------------
+若忘记root密码：
+	退出mysql服务
+	sudo vim /etc/my.cnf 在最后添加skip-grant-tables
+	sudo service mysqld restart
+	mysql -uroot -p 回车，不用输入任何就能进入
+	use mysql
+	show tables
+	set password = password('....');报错不能更新，换一种方法
+	update user set authentication_string=password('....') where user='root';
+	flush privileges;
+	exit
+	将skip-grant-tables关闭：sudo vim /etc/my.cnf 在skip前面添加#
+	service mysqld restart;
+
+mysql中导出数据库
+	mysqldump -uroot -p o2o > o2o
+	将其scp到远程 scp o2o.sql root@ip:/root
+	导进数据库 mysql -uroot -p   show databases;  create database o2o; use o2o; source ~/o2o.sql
+
+---------------------------------------------------------
+练习：
+delete from user where User='imooc' and Host='%';
+grant all privileges on *.* to 'work'@'%' identified by 密码 with grant option;
+
