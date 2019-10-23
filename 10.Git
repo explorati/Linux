@@ -1,0 +1,100 @@
+Git不等同于github，github是一个网站项目管理平台，github上的项目都是可以基于Git进行管理的
+git是命令行工具、是分布式版本控制工具，SVN是集中式版本控制工具
+SVN：在远程创建一个SVN版本库，本地使用打分支合并的方式进行版本控制
+git可以记录每个版本的所有信息，而SVN只纪录每个版本之间的不同点
+git可以离线完成大部分工作，因为可以直接提交到本地仓库中，而SVN在离线时则不能
+
+
+安装Git：yum install git
+-------------------------------------------
+git clone
+git也是基于ssh协议的进行访问的
+cd ~/.ssh/
+ssh-keygen生成ssh key
+cat id_rsa.pub  并将其放到git或github上
+git clone ssh地址或https地址
+-----------------------------------------
+git remote -v：查看远程源
+git remote
+最初默认源为：origin
+添加源：git remote add bd 地址
+删除源：git remote rm bd
+一般只配置一个源，默认origin
+--------------------------------------------
+vim README.md 
+git status
+git commit -am "vincent --modify readme"   -m：注释
+会提示告诉我你是谁
+git config --global user.email "1748419447@qq.com" 
+git config --global user.name "explorati"
+git push
+---------------------------------------
+将远程的更改推送到本地
+git fetch
+git rebase origin/master
+
+------------------------------------------
+上面是先有远程再有本地，而init的使用就是先有本地再有远程
+git init在初始化一个普通目录变为仓库时使用
+在此仓库中新建个文件，添加进仓库add可以，commit可以，但是推送push的时候就不行了，因为没有源，可以通过git remote -v查看什么都没有
+git remote add origin 地址
+git push origin master:master  此时是不能推送的，必须先
+git fetch
+git rebase origin/master
+git push origin master:master
+
+-----------------------------------------------------
+版本回退
+git log 查看过去版本号
+git reset --hard 版本号
+git fetch
+git rebase master
+
+git reset 是当commit但是还没有push时使用
+git revert 是当push之后想回退使用   
+若push之后使用 git reset 则会在修改之后push时造成很多冲突，而revert不会 亲测
+-------------------------------------------------------
+git命令自动补全
+Git 常用命令
+git config
+git clone
+git fetch
+git rebase
+git init
+git remote
+git commit
+git push
+
+git log：显示提交记录
+
+远端发生更改，同步到本地的方法：
+	文件夹下：git fetch  之后 git merge
+		或者 git pull
+
+git的一个使用场景：在本地进行开发完，直接上传到git中，然后在远程服务器上用git clone可以很快的传到服务器上
+
+------------------------------------------------------------------------
+命令自动补全
+	最初 git fe按tab是没有反应的
+	git clone git@github.com:git/git.git
+	或者到/tmp目录解压传过来的git-master.zip
+	sudo cp contrib/completion/git-completion.bash /etc/bash_completion.d/
+	cd /etc/bash_completion.d/发现有git-completion.bash
+	到任意git仓库目录下，如cd /tmp/test/
+	再次执行 git fe按tab会自动补全
+
+	但是退出之后又不好使了
+
+
+Eclipse中项目使用Git：
+	先建立远程仓库，再git clone，在建立web项目时，目录直接使用git的目录就ok了
+	若要先建立远程，需先把远程库清空，或者还得clone过来才能同步
+	1. git init
+	2. git add .
+	3. git commit -am "###"      -------以上3步只是本地提交
+	4.git remote add origin git@xx.xx.xx.xx:repos/xxx/xxx/xxx.git
+	5.git push origin 本地分支:远程分支
+
+
+
+
