@@ -1,0 +1,94 @@
+WebServer
+nginx apache   还有一个只支持windows的IIS
+apache和nginx都是跨平台的
+
+Apache基本操作
+	安装 yum install httpd
+	启动 service httpd start
+	停止 service httpd stop
+	ps -ef|grep httpd
+
+	sudo netstat -anpl|grep 'http'
+	sudo service firewalld stop
+
+
+不需要将系统自带的删除，或者根据上面的下载，否则apache访问不到
+
+使用阿里云访问需在安全组开启端口，再在服务器上关闭防火墙
+
+配置虚拟主机
+	cd /etc/httpd/  
+	cd conf
+	sudo vim httpd.conf
+	查找virtual这个词， /virtual会高亮显示，想找下一个需要按'n'
+	添加	<VirtualHost *:80>
+	 		ServerName www.imooc.test
+	 		DocumentRoot /data/www
+	 	</VirtualHost>
+	 sudo service httpd restart
+	在另开一个终端
+		su imooc
+		mkdir -p /data/www
+		sudo chown -R imooc:imooc /data
+		vim index.html
+	试着通过www.imooc.test访问-->无法访问
+	测试服务器
+		在C:\Windows\System32\drivers\etc下的hosts中添加  ip www.imooc.test
+	再次访问发现访问的是和原来ip访问一样的，说明刚才配的虚拟主机是没有作用的
+	sudo su -  : 进入到root用户
+	cd /etc/httpd/logs/  
+	tail -f error_log : 查看错误信息
+	cd /etc/httpd/
+	vi httpd.conf
+		<Virtual *:80>
+	 		ServerName:www.imooc.test
+	 		DocumentRoot /data/www
+	 		<Directory "/data/www">
+	 			Options Indexes FollowSymLinks
+	 			AllowOverride None
+	 			Require all granted
+	 		</Directory>
+	 	</Virtual>
+	sudo service httpd restart
+	再次访问就可以了
+
+sudo setenforce 1
+sudo setenforce 0
+重启之后也不改变
+sudo vim /etc/selinux/config
+	改为selinux=disabled
+
+总结：1.在/etc/httpd/conf/中vim httpd.conf，添加上面的配置
+	  2.到根目录下面创建对应的目录 /data/www
+	  3.将目录权限授权为用户 sudo chown -R imooc:imooc /data
+	  4.在主机上找到hosts文件，添加 ip www.imooc.test
+	  5.访问
+	上面的过程主要是为了做服务器测试，不用购买域名也可以，而且还可以测试多个
+
+伪静态：例如，虽然是用php编写的，后缀为php，但可以通过伪静态来让别人访问时看到你想让他看到的显示结果 
+	为虚拟主机配置伪静态
+	cd /etc/httpd/conf/
+	vim httpd.conf
+		添加伪静态LoadModule rewrite_module modules/mod_rewrite.so
+	重启服务 sudo service httpd restart
+	再<Virtual *:80>
+	 		ServerName:www.imooc.test
+	 		DocumentRoot /data/www
+	 		<Directory "/data/www">
+	 			Options Indexes FollowSymLinks
+	 			AllowOverride None
+	 			Require all granted
+	 			<IfModule mod_rewrite.c>
+	 				RewriteEngine On
+	 				RewriteRule ^(.*).htmp$ index.html
+	 			</IfModule>
+	 		</Directory>
+	 	</Virtual>
+	---------------------------------------------------------------- 	
+	 	解读：	<IfModule mod_rewrite.c>   --如果存在模块rewrite
+	 				RewriteEngine On       --重写引擎 On
+	 				RewriteRule ^(.*).htmp$ index.html	--若传进来的为*.htmp,则指向index.html
+	 			</IfModule>
+
+
+	 zip文件：yum install -y unzip zip
